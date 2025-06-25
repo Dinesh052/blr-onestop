@@ -6,6 +6,7 @@ import ollama
 import chainlit as cl
 import logging
 from pathlib import Path
+from difflib import SequenceMatcher
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -23,7 +24,7 @@ class BangaloreCityBot:
 
     async def initialize(self):
         await self.load_database()
-        return True  # Skip model check for now
+        return True
 
     async def load_database(self):
         try:
@@ -47,13 +48,25 @@ class BangaloreCityBot:
             logger.error(f"Error loading database: {e}")
             raise Exception(f"Could not load Excel file: {e}")
 
+    def is_relevant(self, contact: Dict[str, str], query: str) -> bool:
+        query = query.lower()
+        return any(
+            query in str(value).lower() or
+            SequenceMatcher(None, query, str(value).lower()).ratio() > 0.75
+            for value in contact.values()
+        )
+
     async def get_response(self, query: str) -> str:
+        filtered_contacts = [c for c in self.contacts_data if self.is_relevant(c, query)]
+        if not filtered_contacts:
+            filtered_contacts = [c for c in self.contacts_data if 'police' in c['Department'].lower()]
+
         prompt = f"""You are an AI assistant helping citizens of Bangalore find the right government officials for their problems.
 
-USER QUERY: "{query}"
+USER QUERY: \"{query}\"
 
 CONTACT DATABASE:
-{json.dumps(self.contacts_data[:50], indent=1)}  # Limit to first 50 for context window
+{json.dumps(filtered_contacts, indent=1)}
 
 INSTRUCTIONS:
 1. Analyze the user's query to understand their issue and location (if mentioned)
@@ -67,7 +80,7 @@ RESPONSE FORMAT:
 - Provide relevant contact information clearly formatted
 - Include name, designation, department, area, phone, email if available
 - Give actionable advice on what to do next
-- Be conversational and helpful
+- Be conversational and helpful and friendlt
 - Use emojis to make it more friendly
 
 Please provide your response now:"""
@@ -80,7 +93,7 @@ Please provide your response now:"""
                     prompt=prompt,
                     options={
                         'temperature': 0.3,
-                        'max_tokens': 800,
+                        'max_tokens': 80000,
                         'top_p': 0.9
                     }
                 )
@@ -91,7 +104,7 @@ Please provide your response now:"""
             return self._create_fallback_response(query)
 
     def _create_fallback_response(self, query: str) -> str:
-        return f"""🤖 I understand you're asking about: "{query}"
+        return f"""🤖 I understand you're asking about: \"{query}\"
 
 I'm having trouble processing your request right now, but here are some general contacts that might help:
 
