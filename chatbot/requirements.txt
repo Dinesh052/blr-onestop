@@ -1,0 +1,4 @@
+chainlit
+pandas
+openpyxl
+ollama
