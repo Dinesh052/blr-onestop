@@ -19,7 +19,7 @@
   onMount(() => {
     if (browser) {
       loader = new Loader({
-        apiKey: import.meta.env.VITE_GMAPS_API_KEY,
+        apiKey: "AIzaSyDBoa0A6ZNDJmBWrVpr_36gOsnu_tH_I4s",
         version: 'weekly',
         libraries: ['geocoding']
       });
@@ -52,8 +52,8 @@
           if (status === 'OK' && results[0]) {
             const { lat, lng } = results[0].geometry.location;
             selectedCoordinates.set({
-              lat: lat().toFixed(5),
-              lng: lng().toFixed(5)
+              lat: Number(lat().toFixed(5)),
+              lng: Number(lng().toFixed(5))
             } as LngLat);
             selectedBoundaryMap.set(null);
             selectedDistrict.set(null);
@@ -124,7 +124,7 @@
   <div class="relative flex flex-1">
     <GooglePlacesAutocomplete
       bind:inputField
-      apiKey={import.meta.env.VITE_GMAPS_API_KEY}
+      apiKey="AIzaSyDBoa0A6ZNDJmBWrVpr_36gOsnu_tH_I4s"
       class="search relative flex-1 l-0 t-0 r-0 py-2 px-3 pl-10 pr-10 flex-1 w-full bg-white shadow-md rounded focus:outline-none focus:ring focus:ring-blue-500"
       on:place_changed={onPlaceChanged}
       placeholder={$_('search_placeholder')}

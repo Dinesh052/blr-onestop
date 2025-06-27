@@ -3,7 +3,8 @@
   import {
     selectedBoundaryMap,
     selectedCoordinates,
-    selectedDistrict
+    selectedDistrict,
+    chatbotSelection
   } from '../stores';
   import Map from '../components/Map.svelte';
   import Sidebar from '../components/Sidebar/Sidebar.svelte';
@@ -22,6 +23,16 @@
     fallbackLocale: 'en',
     initialLocale: data.initialLocale
   });
+
+  // React to chatbot selection
+  $: if (browser && $chatbotSelection.division && $chatbotSelection.area) {
+    if ($selectedBoundaryMap !== $chatbotSelection.division) {
+      selectedBoundaryMap.set($chatbotSelection.division);
+    }
+    if ($selectedDistrict !== $chatbotSelection.area) {
+      selectedDistrict.set($chatbotSelection.area);
+    }
+  }
 
   $: if (browser) {
     const url = new URL(page.url);

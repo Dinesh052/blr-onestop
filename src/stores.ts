@@ -56,3 +56,8 @@ if (browser) {
   const darkModeQuery = new MediaQuery('(prefers-color-scheme: dark)');
   darkMode.set(darkModeQuery.current);
 }
+
+export const chatbotSelection = writable<{ division: string | null; area: string | null }>({
+  division: null,
+  area: null
+});
